@@ -36,6 +36,7 @@ import java.net.Socket;
  * This class is configured by setting ContextFactory attributes which in turn
  * are usually configured through a properties file.  All the attributes are
  * prefixed by the contextName. For example, the properties file might contain:
+ *
  * <pre>
  * mapred.class=org.apache.hadoop.metrics.graphite.GraphiteContext
  * mapred.period=60
@@ -45,19 +46,21 @@ import java.net.Socket;
  */
 @SuppressWarnings("deprecation")
 public class GraphiteContext extends AbstractMetricsContext {
-    
+
   /* Configuration attribute names */
   protected static final String SERVER_NAME_PROPERTY = "serverName";
+  protected static final String HOST_NAME_PROPERTY = "hostName";
   protected static final String PERIOD_PROPERTY = "period";
   protected static final String PORT = "port";
   protected static final String PATH = "path";
+
   private String serverName = null;
   private String pathName = null;
-  private int port = 0; 
-    
+  private int port = 0;
+
   /** Creates a new instance of GraphiteContext */
   public GraphiteContext() {}
-    
+
   public void init(String contextName, ContextFactory factory) {
     super.init(contextName, factory);
 
@@ -68,43 +71,46 @@ public class GraphiteContext extends AbstractMetricsContext {
     if (pathName == null) {
         pathName = "Platform.Hadoop";
     }
-        
-    parseAndSetPeriod(PERIOD_PROPERTY);
 
+    parseAndSetPeriod(PERIOD_PROPERTY);
   }
 
   /**
    * Emits a metrics record to Graphite.
    */
   public void emitRecord(String contextName, String recordName, OutputRecord outRec) throws IOException {
-    StringBuilder sb = new StringBuilder();
-    String hostname = outRec.getTag("hostName").toString(); // Only want to send first part of hostname.  
-    String split[] = hostname.split("[.]");
-    String metric = pathName + "." + contextName + "." + split[0] + "."; // Need to make the first part configurable
+    String hostname = outRec.getTag(HOST_NAME_PROPERTY).toString().replace(".", "_");
+    String metric = pathName + "." + contextName + "." + hostname + "."; // Need to make the first part configurable
     long tm = System.currentTimeMillis() / 1000; // Graphite doesn't handle milliseconds
+
+    String graphiteSeparator = " ";
+    StringBuilder sb = new StringBuilder();
     for (String metricName : outRec.getMetricNames()) {
         sb.append(metric);
         sb.append(metricName);
-        String separator = " ";
-        sb.append(separator);
+
+        sb.append(graphiteSeparator);
         sb.append(outRec.getMetric(metricName));
-        sb.append(separator);
+
+        sb.append(graphiteSeparator);
         sb.append(tm);
+
         sb.append("\n");
-        emitMetric(sb.toString()); 
+        emitMetric(sb.toString().toLowerCase());
+
         sb = new StringBuilder();
     }
   }
 
   protected void emitMetric(String metric) throws IOException {
-      Socket socket = new Socket(serverName, port);
-      try { 
-          Writer writer = new OutputStreamWriter(socket.getOutputStream());
-          writer.write(metric);
-          writer.flush();
-          writer.close();
-      } finally { 
-          socket.close();
-      }
+    Socket socket = new Socket(serverName, port);
+    try {
+        Writer writer = new OutputStreamWriter(socket.getOutputStream());
+        writer.write(metric);
+        writer.flush();
+        writer.close();
+    } finally {
+        socket.close();
+    }
   }
 }
