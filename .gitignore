@@ -1,1 +1,2 @@
-GraphiteContext.jar
+target/
+.DS_Store
