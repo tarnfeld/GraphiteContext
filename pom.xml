@@ -10,7 +10,7 @@
     <properties>
         <mavenCompilerPlugin>3.0</mavenCompilerPlugin>
         <maven-compiler-plugin.source>1.6</maven-compiler-plugin.source>
-        <hadoop-core.version>1.0.4</hadoop-core.version>
+        <hadoop-client.version>2.3.0</hadoop-client.version>
     </properties>
 
 
@@ -34,8 +34,8 @@
     <dependencies>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <version>${hadoop-core.version}</version>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoop-client.version}</version>
     </dependency>
   </dependencies>
 </project>
