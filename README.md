@@ -1,37 +1,40 @@
 GraphiteContext
 ===============
 
-Like the GangliaContext for Hadoop, sends metrics to Graphite
+Like the GangliaContext for Hadoop 2, you can use this to sends metrics to Graphite.
 
-Compile:
+### Compiling
 
     $ mvn install
 
-Installation:
+### Installing
 
-In your hadoop-env.sh file (usually in /etc/hadoop/conf/), add the location of the GraphiteContext.jar file into the HADOOP_CLASSPATH
+To install, you only need to drop the compiled jar (from `target/`) into your hadoop classpath. This can vary, but the `hadoop classpath` command line tool is your friend.
 
-example: export HADOOP_CLASSPATH="/[path_to]/GraphiteContext.jar"
+### Setting everything up
 
-Configuration:
-
-In your hadoop-metrics.properties file, add the following for all metrics
+Once installed, you'll need to update the `hadoop-metrics.properties` configuration file, something like the below will get you started.
 
     mapred.class=org.apache.hadoop.metrics.graphite.GraphiteContext
     mapred.period=60
-    mapred.serverName=@Your Graphite Server@
+    mapred.serverName={graphite_host}
     mapred.port=2013
+
     jvm.class=org.apache.hadoop.metrics.graphite.GraphiteContext
     jvm.period=60
-    jvm.serverName=@Your Graphite Server@
+    jvm.serverName={graphite_host}
     jvm.port=2013
+
     dfs.class=org.apache.hadoop.metrics.graphite.GraphiteContext
     dfs.period=60
-    dfs.serverName=@Your Graphite Server@
+    dfs.serverName={graphite_host}
     dfs.port=2013
+
     ugi.class=org.apache.hadoop.metrics.graphite.GraphiteContext
     ugi.period=60
-    ugi.serverName=@Your Graphite Server@
+    ugi.serverName={graphite_host}
     ugi.port=2013
 
-metric.path=@Your Path@ can be used to specify the path in Graphite. Defaults to Platform.Hadoop
+By default, metrics will be prefixed with `Platform.Hadoop`. You can changed this prefix using the `path` attribute of each metric. For example...
+
+    mapred.path=hadoop.test
